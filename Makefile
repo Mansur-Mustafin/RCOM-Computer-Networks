@@ -9,6 +9,7 @@ SRC = src/
 INCLUDE = include/
 BIN = bin/
 
+URL = ftp://mansur:123@feup/urlPath  # We can change this URL.
 
 # Targets
 .PHONY: all
@@ -17,6 +18,9 @@ all: $(BIN)/download
 $(BIN)/download: $(SRC)/*.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(INCLUDE)
 
+.PHONY: run
+run: $(BIN)/download
+	./$(BIN)/download $(URL)
 
 .PHONY: clean
 clean:
