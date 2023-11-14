@@ -41,7 +41,7 @@ int parse_ftp_url(const char *text, struct Settings *settings) {
     return 0;
 }
 
-int establish_ftp_connection(const char *IP, const int port, int *socketFD){
+int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
 
     int sockfd;
     struct sockaddr_in server_addr;
@@ -65,11 +65,27 @@ int establish_ftp_connection(const char *IP, const int port, int *socketFD){
         return -1;
     }
 
-    *socketFD = sockfd;
+    *socket_fd = sockfd;
 
+    printf("[INFO] socket_A: %d\n", sockfd);
+
+    /*read response from server*/
+    char* response_buffer = malloc(MAX_RESPONSE_SIZE);
+    int ftp_response_code = 0;
+
+    if(read_ftp_response(sockfd, response_buffer, &ftp_response_code)){
+        printf("ERROR failed read response message\n");
+        free(response_buffer);
+        return -1;
+    }
+
+    if(ftp_response_code != CODE_220){
+        printf("[ERROR] failed onnection to %s\n", IP);
+        return -1;
+    }
+    free(response_buffer);
     return 0;
 }
-
 
 int read_ftp_response(const int socket_fd, char* response_buffer, int* response_code){
     if(response_buffer == NULL || response_code == NULL) return -1;
@@ -84,8 +100,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
 
         if(read_status == -1) return -1;
         
-        printf("flag: %d ", read_status);
-        printf("byte: %c\n", byte);
+        // printf("flag: %d byte: %c\n", read_status, byte);
 
         switch (state)
         {
@@ -113,7 +128,76 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
             break;
         }
     }
-    printf("Response message: %s\n", response_buffer);
+    
     *response_code /= 10;
+
+    printf("[INFO] FTP response code: %d\n", *response_code);
+    printf("[INFO] Response message: %s\n", response_buffer);
     return 0;
 }
+
+int send_ftp_command(const int socket_fd, const char* command){
+    size_t bytes = write(socket_fd, command, strlen(command));
+    if (bytes < 0) {
+        perror("[ERROR] filed sending command to FTP server");
+        return -1;
+    }
+    return 0;
+}
+
+int login_ftp(const int socket_fd, const char* username, const char* password) {
+    if(username == NULL || password == NULL) return -1;
+
+    char *command = malloc(MAX_RESPONSE_SIZE);
+    char *response = malloc(MAX_RESPONSE_SIZE);
+    int response_code = 0;
+
+    // Send USER command
+    snprintf(command, MAX_RESPONSE_SIZE, "USER %s\r\n", username);
+    if (send_ftp_command(socket_fd, command) < 0) {
+        free(response);
+        free(command);
+        return -1;
+    }
+    
+    if (read_ftp_response(socket_fd, response, &response_code) < 0){
+        free(response);
+        free(command);
+        return -1;
+    } 
+    
+    if (response_code != CODE_331) {
+        printf("[ERROR] login failed with user: %s", username);
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    // Send PASS command
+    snprintf(command, MAX_RESPONSE_SIZE, "PASS %s\r\n", password);
+    if (send_ftp_command(socket_fd, command) < 0) {
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    if (read_ftp_response(socket_fd, response, &response_code) < 0) {
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    if (response_code != CODE_230) {
+        printf("[ERROR] login failed with password: %s", password);
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    free(response);
+    free(command);
+
+    printf("[INFO] FTP login successful\n");
+    return 0;
+}
+
