@@ -9,7 +9,9 @@ SRC = src/
 INCLUDE = include/
 BIN = bin/
 
-URL = ftp://mansur:123@feup/urlPath  # We can change this URL.
+URL = ftp://netlab1.fe.up.pt  # We can change this URL.
+# ftp://rcom:rcom@netlab1.fe.up.pt
+# ftp://rcom:rcom@netlab1.fe.up.pt/some-url-path
 
 # Targets
 .PHONY: all
