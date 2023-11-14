@@ -27,12 +27,24 @@ int main(int argc, char *argv[]) {
            settings.url_path,
            settings.ip);
 
-    int socket;
-    if(establish_ftp_connection(settings.ip, SERVER_PORT, &socket)){
+    // Criar conexao socket_A.
+    int socket_A;
+    if(establish_ftp_connection(settings.ip, SERVER_PORT, &socket_A)){
         exit(-1);
     }
 
-    printf("Socket created: %d\n", socket);
+    printf("[INFO] socket_A: %d\n", socket_A);
+
+    // Receive 220 code.
+    char* response_buffer = malloc(MAX_SIZE);
+    int ftp_response_code = 0;
+    if(read_ftp_response(socket_A, response_buffer, &ftp_response_code)){
+        free(response_buffer);
+        exit(-1);
+    }
+    printf("[INFO] FTP response code: %d\n", ftp_response_code);
+
+    
 
     return 0;
 }

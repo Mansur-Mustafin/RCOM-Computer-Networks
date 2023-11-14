@@ -14,9 +14,9 @@
 
 #define MAX_SIZE 256
 
-#define SERVER_PORT 21
+#define SERVER_PORT 21 // TPF tranfer
 
-#define h_addr h_addr_list[0]	//The first address in h_addr_list.
+#define h_addr h_addr_list[0]	// The first address in h_addr_list.
 
 struct Settings {
     char user[MAX_SIZE];
@@ -26,8 +26,17 @@ struct Settings {
     char ip[MAX_SIZE];
 };
 
+enum state{
+    START, 
+    CODE,   // state of receive code
+    MESSAGE,   // state of receive message
+    STOP
+};
+
 // Parcer of text (getip.c)
 int parse_ftp_url(const char *text, struct Settings *settings);
 
 // Create and connect to socket
 int establish_ftp_connection(const char *IP, const int port, int *socketFD);
+
+int read_ftp_response(const int socket_fd, char* response_buffer, int* response_code);

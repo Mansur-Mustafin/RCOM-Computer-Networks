@@ -69,3 +69,51 @@ int establish_ftp_connection(const char *IP, const int port, int *socketFD){
 
     return 0;
 }
+
+
+int read_ftp_response(const int socket_fd, char* response_buffer, int* response_code){
+    if(response_buffer == NULL || response_code == NULL) return -1;
+
+    enum state state = START;
+    int indx = 0;
+    *response_code = 0;
+
+    while(state != STOP){
+        char byte = 0;
+        int read_status = read(socket_fd, &byte, sizeof(byte));
+
+        if(read_status == -1) return -1;
+        
+        printf("flag: %d ", read_status);
+        printf("byte: %c\n", byte);
+
+        switch (state)
+        {
+        case START:
+            state = CODE;
+        case CODE:
+            if(read_status == 0 || byte == '\n') state = STOP;
+            else if(read_status == 1 && byte == ' ') state = MESSAGE;
+            else if(read_status == 1){
+                *response_code += byte - 48;    // Transform ASCII to decimal number
+                *response_code *= 10;           // Left shift 
+            }
+            break;
+        case MESSAGE:
+            if(read_status == 0 || byte == '\n'){
+                state = STOP;
+                response_buffer[indx] = '\0';
+            } 
+            else if(read_status == 1){
+                response_buffer[indx++] = byte;
+            }
+            break;
+        default:
+            state = START;
+            break;
+        }
+    }
+    printf("Response message: %s\n", response_buffer);
+    *response_code /= 10;
+    return 0;
+}
