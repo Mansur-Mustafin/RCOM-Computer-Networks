@@ -15,9 +15,9 @@ URL = ftp://netlab1.fe.up.pt  # We can change this URL.
 
 # Targets
 .PHONY: all
-all: $(BIN)/download 
+all: $(BIN)/download
 
-$(BIN)/download: $(SRC)/*.c
+$(BIN)/download: main.c $(SRC)/*.c
 	$(CC) $(CFLAGS) -o $@ $^ -I$(INCLUDE)
 
 .PHONY: run
