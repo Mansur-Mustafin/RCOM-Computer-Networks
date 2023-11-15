@@ -67,3 +67,6 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port);
 
 // Baixa o arquivo.
 int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path);
+
+// Funca auxiliar que faz free()
+void free_resources(char* buf1, char* buf2, char* buf3);

@@ -12,9 +12,10 @@ int parse_ftp_url(const char *text, struct Settings *settings){
                                 settings->password,
                                 settings->host,
                                 settings->url_path);
-
-        if (result < 3) return -1;
-        if (result == 3) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
+        
+        if (result != 4) return -1;
+        // if (result < 3) return -1;
+        // if (result == 3) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
         
     } else {
         // URL does not contain user and password, parse accordingly
@@ -22,8 +23,9 @@ int parse_ftp_url(const char *text, struct Settings *settings){
                                 settings->host, 
                                 settings->url_path);
         
-        if (result < 1) return -1;
-        if (result == 1) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
+        if (result != 2) return -1;
+        // if (result < 1) return -1;
+        // if (result == 1) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
         
         strncpy(settings->user, "anonymous", MAX_SIZE - 1);
         strncpy(settings->password, "anonymous", MAX_SIZE - 1);
@@ -178,47 +180,40 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
     // Send USER command
     snprintf(command, MAX_RESPONSE_SIZE, "USER %s\r\n", username);
     if(send_ftp_command(socket_fd, command) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
     
     if(read_ftp_response(socket_fd, response, &response_code) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     } 
     
     if(response_code != CODE_331){
         printf("[ERROR] login failed with user: %s", username);
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
 
     // Send PASS command
     snprintf(command, MAX_RESPONSE_SIZE, "PASS %s\r\n", password);
     if(send_ftp_command(socket_fd, command) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
 
     if(read_ftp_response(socket_fd, response, &response_code) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
 
     if(response_code != CODE_230){
         printf("[ERROR] login failed with password: %s", password);
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
 
-    free(response);
-    free(command);
+    free_resources(response, command, NULL);
 
     // printf("[INFO] FTP login successful\n");
     return 0;
@@ -273,27 +268,32 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     // Send retr command.
     snprintf(command, MAX_RESPONSE_SIZE, "retr %s\r\n", url_path);
     if(send_ftp_command(socket_fd_A, command) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
     
     if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     } 
     
     if(response_code != CODE_150){
         printf("[ERROR] retr command with URL path: %s", url_path);
-        free(response);
-        free(command);
+        free_resources(response, command, NULL);
         return -1;
     }
 
     // Download file.
 
-    char filename[30] = "test.txt"; 
+    char filename[MAX_SIZE];
+    const char *last_slash = strrchr(url_path, '/');
+    if (last_slash != NULL) {
+        strncpy(filename, last_slash + 1, MAX_SIZE - 1);
+    } else {
+        strncpy(filename, url_path, MAX_SIZE - 1);
+    }
+    filename[MAX_SIZE - 1] = '\0';
+
 
     FILE *file = fopen(filename, "wb");
 
@@ -307,9 +307,7 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
 
     while( (bytes_read = read(socket_fd_B, buf, MAX_SIZE)) > 0 ){
         if(fwrite(buf, bytes_read, 1, file) < 0){
-            free(buf);
-            free(response);
-            free(command);
+            free_resources(buf, response, command);
             return -1;
         }
     }
@@ -318,23 +316,22 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     // Check if its was finished.
 
     if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
-        free(buf);
-        free(response);
-        free(command);
+        free_resources(buf, response, command);
         return -1;
     } 
 
     if(response_code != CODE_226){
         printf("[ERROR] transfer was not complete\n");
-        free(buf);
-        free(response);
-        free(command);
+        free_resources(buf, response, command);
         return -1;
     }
 
-    free(buf);
-    free(response);
-    free(command);
+    free_resources(buf, response, command);
     return 0;
 }
 
+void free_resources(char* buf1, char* buf2, char* buf3){
+    free(buf1);
+    free(buf2);
+    free(buf3);
+}
