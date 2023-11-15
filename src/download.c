@@ -330,6 +330,14 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     return 0;
 }
 
+int clouse_connection(const int socket_fd){
+    if (close(socket_fd)<0) {
+        perror("close()");
+        return -1;
+    }
+    return 0;
+}
+
 void free_resources(char* buf1, char* buf2, char* buf3){
     free(buf1);
     free(buf2);

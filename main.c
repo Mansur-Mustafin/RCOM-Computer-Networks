@@ -56,5 +56,10 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
+    // TODO: so isso?
+    if(clouse_connection(socket_A) || clouse_connection(socket_B)){
+        exit(-1);
+    }
+
     return 0;
 }
