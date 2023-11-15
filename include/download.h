@@ -53,3 +53,7 @@ int send_ftp_command(const int socket_fd, const char* command);
 
 // Faz Login ao servidor (USER anonymous; PASS anonymous) 
 int login_ftp(const int socket_fd, const char* username, const char* password);
+
+// TODO: perguntar ao professor se e nessario pegar o data_ip? Ele nao vai ser igual ao IP do socket_A?
+// send command pasv and cacl the data_port
+int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port);

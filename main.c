@@ -37,5 +37,14 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
+    char* data_ip = malloc(MAX_SIZE);
+    int data_port = 0;
+    if(enter_ftp_passive_mode(socket_A, data_ip, &data_port)){
+        exit(-1);
+    }
+
+    printf("data_port = %d\n", data_port);
+    printf("data_ip: %s\n", data_ip);
+
     return 0;
 }

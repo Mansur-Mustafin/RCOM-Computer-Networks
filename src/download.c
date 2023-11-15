@@ -1,11 +1,11 @@
 #include "download.h"
 
-int parse_ftp_url(const char *text, struct Settings *settings) {
+int parse_ftp_url(const char *text, struct Settings *settings){
 
     // Check if URL contains user and password info
     const char *at_sign = strchr(text, '@');
     int result;
-    if (at_sign) {
+    if(at_sign){
         // URL contains user and password
         result = sscanf(text, "ftp://%255[^:]:%255[^@]@%255[^/]/%255[^\n]",
                                 settings->user,
@@ -29,9 +29,9 @@ int parse_ftp_url(const char *text, struct Settings *settings) {
         strncpy(settings->password, "anonymous", MAX_SIZE - 1);
     }
 
-    if (strlen(settings->host) == 0) return -1;
+    if(strlen(settings->host) == 0) return -1;
     struct hostent *h;
-    if ((h = gethostbyname(settings->host)) == NULL) {
+    if((h = gethostbyname(settings->host)) == NULL){
         herror("gethostbyname()");
         return -1;
     }
@@ -138,14 +138,14 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
 
 int send_ftp_command(const int socket_fd, const char* command){
     size_t bytes = write(socket_fd, command, strlen(command));
-    if (bytes < 0) {
+    if(bytes < 0){
         perror("[ERROR] filed sending command to FTP server");
         return -1;
     }
     return 0;
 }
 
-int login_ftp(const int socket_fd, const char* username, const char* password) {
+int login_ftp(const int socket_fd, const char* username, const char* password){
     if(username == NULL || password == NULL) return -1;
 
     char *command = malloc(MAX_RESPONSE_SIZE);
@@ -154,19 +154,19 @@ int login_ftp(const int socket_fd, const char* username, const char* password) {
 
     // Send USER command
     snprintf(command, MAX_RESPONSE_SIZE, "USER %s\r\n", username);
-    if (send_ftp_command(socket_fd, command) < 0) {
+    if(send_ftp_command(socket_fd, command) < 0){
         free(response);
         free(command);
         return -1;
     }
     
-    if (read_ftp_response(socket_fd, response, &response_code) < 0){
+    if(read_ftp_response(socket_fd, response, &response_code) < 0){
         free(response);
         free(command);
         return -1;
     } 
     
-    if (response_code != CODE_331) {
+    if(response_code != CODE_331){
         printf("[ERROR] login failed with user: %s", username);
         free(response);
         free(command);
@@ -175,19 +175,19 @@ int login_ftp(const int socket_fd, const char* username, const char* password) {
 
     // Send PASS command
     snprintf(command, MAX_RESPONSE_SIZE, "PASS %s\r\n", password);
-    if (send_ftp_command(socket_fd, command) < 0) {
+    if(send_ftp_command(socket_fd, command) < 0){
         free(response);
         free(command);
         return -1;
     }
 
-    if (read_ftp_response(socket_fd, response, &response_code) < 0) {
+    if(read_ftp_response(socket_fd, response, &response_code) < 0){
         free(response);
         free(command);
         return -1;
     }
 
-    if (response_code != CODE_230) {
+    if(response_code != CODE_230){
         printf("[ERROR] login failed with password: %s", password);
         free(response);
         free(command);
@@ -197,7 +197,46 @@ int login_ftp(const int socket_fd, const char* username, const char* password) {
     free(response);
     free(command);
 
-    printf("[INFO] FTP login successful\n");
+    // printf("[INFO] FTP login successful\n");
     return 0;
 }
 
+int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
+    if(data_ip == NULL || data_port == NULL) return -1;
+
+    char *pasv_command = "pasv\r\n";
+    char *response = malloc(MAX_RESPONSE_SIZE);
+    int response_code = 0;
+
+    if(send_ftp_command(socket_fd, pasv_command) < 0) {
+        free(response);
+        return -1;
+    }
+
+    if(read_ftp_response(socket_fd, response, &response_code) < 0){
+        free(response);
+        return -1;
+    } 
+
+    if(response_code != CODE_227){
+        printf("[ERROR] failed pasv command\n");
+        free(response);
+        return -1;
+    }
+    
+    int ip1, ip2, ip3, ip4, port1, port2;
+    int result = sscanf(response, 
+                        "Entering Passive Mode (%d,%d,%d,%d,%d,%d)", 
+                            &ip1, &ip2, &ip3, &ip4, &port1, &port2);
+
+    if(result != 6){
+        printf("[ERROR] response pasv\n");
+        return -1;
+    }
+
+    snprintf(data_ip, MAX_SIZE, "%d.%d.%d.%d", ip1, ip2, ip3, ip4);
+
+    *data_port = (port1 << 8) + port2;  // port1 * 256 + port2
+    free(response);
+    return 0;
+}
