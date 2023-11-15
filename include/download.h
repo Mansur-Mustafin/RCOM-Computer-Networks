@@ -13,7 +13,7 @@
 #define FALSE 0
 
 #define MAX_SIZE 256
-#define MAX_RESPONSE_SIZE 1024
+#define MAX_RESPONSE_SIZE 2048
 
 #define SERVER_PORT 21 // TPF tranfer
 
@@ -36,14 +36,18 @@ enum state{
     START, 
     CODE,   // state of receive code
     MESSAGE,   // state of receive message
+    FEUP_MOMENT, // case quando pqp tem 200-text
     STOP
 };
 
 // Parcer of text (getip.c)
 int parse_ftp_url(const char *text, struct Settings *settings);
 
-// Create and connect to socket
-int establish_ftp_connection(const char *IP, const int port, int *socketFD);
+// Create socket and connect it
+int connect_socket(const char *IP, const int port, int *socket_fd);
+
+// Create socket and connect it and verify response the server
+int establish_ftp_connection(const char *IP, const int port, int *socket_fd);
 
 // Leia de socket_fd o response_code e response_message
 int read_ftp_response(const int socket_fd, char* response_message, int* response_code);

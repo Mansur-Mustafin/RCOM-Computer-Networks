@@ -41,7 +41,8 @@ int parse_ftp_url(const char *text, struct Settings *settings){
     return 0;
 }
 
-int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
+int connect_socket(const char *IP, const int port, int *socket_fd){
+    if(IP == NULL || socket_fd == NULL) return -1;
 
     int sockfd;
     struct sockaddr_in server_addr;
@@ -67,17 +68,23 @@ int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
 
     *socket_fd = sockfd;
 
-    printf("[INFO] socket_A: %d\n", sockfd);
+    return 0;
+}
+
+int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
+
+    if(connect_socket(IP, port, socket_fd)) return -1;
 
     /*read response from server*/
     char* response_buffer = malloc(MAX_RESPONSE_SIZE);
     int ftp_response_code = 0;
 
-    if(read_ftp_response(sockfd, response_buffer, &ftp_response_code)){
+    if(read_ftp_response((*socket_fd), response_buffer, &ftp_response_code)){
         printf("ERROR failed read response message\n");
         free(response_buffer);
         return -1;
     }
+
 
     if(ftp_response_code != CODE_220){
         printf("[ERROR] failed onnection to %s\n", IP);
@@ -93,6 +100,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
     enum state state = START;
     int indx = 0;
     *response_code = 0;
+    int prev_code = 0;
 
     while(state != STOP){
         char byte = 0;
@@ -100,7 +108,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
 
         if(read_status == -1) return -1;
         
-        // printf("flag: %d byte: %c\n", read_status, byte);
+        // printf("flag: %d; byte: %d; byte: %c\n", read_status, byte, byte);
 
         switch (state)
         {
@@ -108,11 +116,12 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
             state = CODE;
         case CODE:
             if(read_status == 0 || byte == '\n') state = STOP;
-            else if(read_status == 1 && byte == ' ') state = MESSAGE;
-            else if(read_status == 1){
+            else if(read_status == 1 && (byte >= 48 && byte <= 57)){    // case if is digit
                 *response_code += byte - 48;    // Transform ASCII to decimal number
                 *response_code *= 10;           // Left shift 
             }
+            else if(read_status == 1 && byte == ' ') state = MESSAGE;
+            else if(read_status == 1 && byte == '-') state = FEUP_MOMENT;
             break;
         case MESSAGE:
             if(read_status == 0 || byte == '\n'){
@@ -123,6 +132,16 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
                 response_buffer[indx++] = byte;
             }
             break;
+        case FEUP_MOMENT:
+            if(byte == '\n'){
+                state = CODE;
+                if(prev_code != 0 && prev_code != *response_code) return -1; // On new line not the same code.
+                
+                prev_code = *response_code;
+                *response_code = 0; 
+            }
+            response_buffer[indx++] = byte;
+            break;
         default:
             state = START;
             break;
@@ -132,7 +151,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
     *response_code /= 10;
 
     printf("[INFO] FTP response code: %d\n", *response_code);
-    printf("[INFO] Response message: %s\n", response_buffer);
+    printf("[INFO] Response message:\n%s\n", response_buffer);
     return 0;
 }
 
@@ -240,3 +259,4 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
     free(response);
     return 0;
 }
+

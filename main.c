@@ -27,24 +27,32 @@ int main(int argc, char *argv[]) {
            settings.url_path,
            settings.ip);
 
-    // Criar conexao socket_A (tambem verifica a resposta do servidor).
+    /*Criar socket A, connectar ele, e verificar resposta do servidor*/
     int socket_A;
     if(establish_ftp_connection(settings.ip, SERVER_PORT, &socket_A)){
         exit(-1);
     }
-    
+    printf("[INFO] socket_A: %d\n", socket_A);
+
     if(login_ftp(socket_A, settings.user, settings.password)){
         exit(-1);
     }
 
-    char* data_ip = malloc(MAX_SIZE);
-    int data_port = 0;
+    char* data_ip = malloc(MAX_SIZE);       // ip to connect socket_B
+    int data_port = 0;                      // port to connect socket_B
     if(enter_ftp_passive_mode(socket_A, data_ip, &data_port)){
         exit(-1);
     }
 
-    printf("data_port = %d\n", data_port);
-    printf("data_ip: %s\n", data_ip);
+    int socket_B;
+    if(connect_socket(data_ip, data_port, &socket_B)){
+        exit(-1);
+    }
+    printf("[INFO] socket_B: %d\n", socket_B);
+    
+    // TODO: temos que ler algo depois de conectar o socket? (Eu verifiquei tem nada la).
+
+    
 
     return 0;
 }

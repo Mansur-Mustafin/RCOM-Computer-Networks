@@ -9,9 +9,12 @@ SRC = src/
 INCLUDE = include/
 BIN = bin/
 
-URL = ftp://netlab1.fe.up.pt  # We can change this URL.
+URL = ftp://ftp.up.pt/pub/kodi/timestamp.txt  # We can change this URL.
 # ftp://rcom:rcom@netlab1.fe.up.pt
 # ftp://rcom:rcom@netlab1.fe.up.pt/some-url-path
+# ftp://netlab1.fe.up.pt
+# ftp://ftp.up.pt/pub/kodi/timestamp.txt
+
 
 # Targets
 .PHONY: all
