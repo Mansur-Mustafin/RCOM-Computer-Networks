@@ -40,6 +40,7 @@ int parse_ftp_url(const char *text, struct Settings *settings){
 
     /*save the ip*/
     strncpy(settings->ip, inet_ntoa(*((struct in_addr *) h->h_addr)), MAX_SIZE - 1);
+    strncpy(settings->host_name, h->h_name, MAX_SIZE - 1);
 
     /*save the filename*/
     // TODO: take the filename.

@@ -19,11 +19,13 @@ int main(int argc, char *argv[]) {
            "  - User: %s\n"
            "  - Password: %s\n"
            "  - Host: %s\n"
+           "  - Host name: %s\n"
            "  - ULR path: %s\n"
            "  - IP: %s\n",
            settings.user,
            settings.password,
            settings.host,
+           settings.host_name,
            settings.url_path,
            settings.ip);
 

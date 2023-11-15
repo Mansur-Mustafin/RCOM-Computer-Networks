@@ -30,6 +30,7 @@ struct Settings {
     char user[MAX_SIZE];
     char password[MAX_SIZE];
     char host[MAX_SIZE];
+    char host_name[MAX_SIZE]; // of. host name.
     char url_path[MAX_SIZE];  
     char ip[MAX_SIZE];
     char filename[MAX_SIZE];
