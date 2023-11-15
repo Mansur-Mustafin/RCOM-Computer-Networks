@@ -36,7 +36,11 @@ int parse_ftp_url(const char *text, struct Settings *settings){
         return -1;
     }
 
+    /*save the ip*/
     strncpy(settings->ip, inet_ntoa(*((struct in_addr *) h->h_addr)), MAX_SIZE - 1);
+
+    /*save the filename*/
+    // TODO: take the filename.
 
     return 0;
 }
@@ -150,8 +154,8 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
     
     *response_code /= 10;
 
-    printf("[INFO] FTP response code: %d\n", *response_code);
-    printf("[INFO] Response message:\n%s\n", response_buffer);
+    printf("[INFO] [%d] ", *response_code);
+    printf("Message:\n%s\n\n", response_buffer);
     return 0;
 }
 
@@ -257,6 +261,80 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
 
     *data_port = (port1 << 8) + port2;  // port1 * 256 + port2
     free(response);
+    return 0;
+}
+
+int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path){
+
+    char *command = malloc(MAX_RESPONSE_SIZE);
+    char *response = malloc(MAX_RESPONSE_SIZE);
+    int response_code = 0;
+
+    // Send retr command.
+    snprintf(command, MAX_RESPONSE_SIZE, "retr %s\r\n", url_path);
+    if(send_ftp_command(socket_fd_A, command) < 0){
+        free(response);
+        free(command);
+        return -1;
+    }
+    
+    if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
+        free(response);
+        free(command);
+        return -1;
+    } 
+    
+    if(response_code != CODE_150){
+        printf("[ERROR] retr command with URL path: %s", url_path);
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    // Download file.
+
+    char filename[30] = "test.txt"; 
+
+    FILE *file = fopen(filename, "wb");
+
+    if(file == NULL){
+        printf("[ERROR] open file\n");
+        return -1;
+    }
+
+    char *buf = malloc(MAX_SIZE);
+    int bytes_read = 0;
+
+    while( (bytes_read = read(socket_fd_B, buf, MAX_SIZE)) > 0 ){
+        if(fwrite(buf, bytes_read, 1, file) < 0){
+            free(buf);
+            free(response);
+            free(command);
+            return -1;
+        }
+    }
+    fclose(file);
+
+    // Check if its was finished.
+
+    if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
+        free(buf);
+        free(response);
+        free(command);
+        return -1;
+    } 
+
+    if(response_code != CODE_226){
+        printf("[ERROR] transfer was not complete\n");
+        free(buf);
+        free(response);
+        free(command);
+        return -1;
+    }
+
+    free(buf);
+    free(response);
+    free(command);
     return 0;
 }
 

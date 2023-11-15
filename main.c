@@ -52,7 +52,9 @@ int main(int argc, char *argv[]) {
     
     // TODO: temos que ler algo depois de conectar o socket? (Eu verifiquei tem nada la).
 
-    
+    if(download_file(socket_A, socket_B, settings.url_path)){
+        exit(-1);
+    }
 
     return 0;
 }

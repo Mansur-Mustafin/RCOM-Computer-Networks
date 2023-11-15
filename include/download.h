@@ -13,7 +13,7 @@
 #define FALSE 0
 
 #define MAX_SIZE 256
-#define MAX_RESPONSE_SIZE 2048
+#define MAX_RESPONSE_SIZE 1024
 
 #define SERVER_PORT 21 // TPF tranfer
 
@@ -23,6 +23,8 @@
 #define CODE_331 331
 #define CODE_230 230
 #define CODE_227 227
+#define CODE_150 150
+#define CODE_226 226
 
 struct Settings {
     char user[MAX_SIZE];
@@ -30,6 +32,7 @@ struct Settings {
     char host[MAX_SIZE];
     char url_path[MAX_SIZE];  
     char ip[MAX_SIZE];
+    char filename[MAX_SIZE];
 };
 
 enum state{
@@ -61,3 +64,6 @@ int login_ftp(const int socket_fd, const char* username, const char* password);
 // TODO: perguntar ao professor se e nessario pegar o data_ip? Ele nao vai ser igual ao IP do socket_A?
 // send command pasv and cacl the data_port
 int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port);
+
+// Baixa o arquivo.
+int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path);
