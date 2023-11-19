@@ -10,9 +10,12 @@ INCLUDE = include/
 BIN = bin/
 
 URL = ftp://ftp.up.pt/pub/kodi/timestamp.txt  # We can change this URL.
-# ftp://rcom:rcom@netlab1.fe.up.pt
-# ftp://rcom:rcom@netlab1.fe.up.pt/some-url-path
-# ftp://netlab1.fe.up.pt
+
+# ftp://netlab1.fe.up.pt/pub.txt
+# ftp://rcom:rcom@netlab1.fe.up.pt/pipe.txt
+# ftp://rcom:rcom@netlab1.fe.up.pt/files/pic1.jpg
+# ftp://rcom:rcom@netlab1.fe.up.pt/files/pic2.png
+# ftp://rcom:rcom@netlab1.fe.up.pt/files/crab.mp4
 # ftp://ftp.up.pt/pub/kodi/timestamp.txt
 
 
