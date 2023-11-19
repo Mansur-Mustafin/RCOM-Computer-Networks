@@ -92,7 +92,6 @@ int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
         return -1;
     }
 
-
     if(ftp_response_code != CODE_220){
         printf("[ERROR] failed onnection to %s\n", IP);
         return -1;

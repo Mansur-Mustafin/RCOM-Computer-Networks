@@ -33,7 +33,6 @@ struct Settings {
     char host_name[MAX_SIZE]; // of. host name.
     char url_path[MAX_SIZE];  
     char ip[MAX_SIZE];
-    char filename[MAX_SIZE];
 };
 
 enum state{
