@@ -37,17 +37,20 @@ int main(int argc, char *argv[]) {
     printf("[INFO] socket_A: %d\n", socket_A);
 
     if(login_ftp(socket_A, settings.user, settings.password)){
+        clouse_connection(socket_A, NOT_CONNECTED);
         exit(-1);
     }
 
     char* data_ip = malloc(MAX_SIZE);       // ip to connect socket_B
     int data_port = 0;                      // port to connect socket_B
     if(enter_ftp_passive_mode(socket_A, data_ip, &data_port)){
+        clouse_connection(socket_A, NOT_CONNECTED);
         exit(-1);
     }
 
     int socket_B;
     if(connect_socket(data_ip, data_port, &socket_B)){
+        clouse_connection(socket_A, NOT_CONNECTED);
         exit(-1);
     }
     printf("[INFO] socket_B: %d\n", socket_B);
@@ -55,16 +58,12 @@ int main(int argc, char *argv[]) {
     // TODO: temos que ler algo depois de conectar o socket? (Eu verifiquei tem nada la).
 
     if(download_file(socket_A, socket_B, settings.url_path)){
+        if(clouse_connection(socket_A, socket_B)) exit(-1);
         exit(-1);
     }
 
     // TODO: so isso?
-    if(clouse_connection(socket_A)){
-        exit(-1);
-    }
-    if(clouse_connection(socket_B)){
-        exit(-1);
-    }
+    if(clouse_connection(socket_A, socket_B)) exit(-1);
 
     return 0;
 }

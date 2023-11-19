@@ -45,7 +45,7 @@ int parse_ftp_url(const char *text, struct Settings *settings){
     /*save the filename*/
     // TODO: take the filename.
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int connect_socket(const char *IP, const int port, int *socket_fd){
@@ -75,7 +75,7 @@ int connect_socket(const char *IP, const int port, int *socket_fd){
 
     *socket_fd = sockfd;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
@@ -97,7 +97,7 @@ int establish_ftp_connection(const char *IP, const int port, int *socket_fd){
         return -1;
     }
     free(response_buffer);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int read_ftp_response(const int socket_fd, char* response_buffer, int* response_code){
@@ -158,7 +158,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
 
     printf("[INFO] [%d] ", *response_code);
     printf("Message:\n%s\n\n", response_buffer);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int send_ftp_command(const int socket_fd, const char* command){
@@ -167,7 +167,7 @@ int send_ftp_command(const int socket_fd, const char* command){
         perror("[ERROR] filed sending command to FTP server");
         return -1;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int login_ftp(const int socket_fd, const char* username, const char* password){
@@ -179,12 +179,12 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
 
     // Send USER command
     snprintf(command, MAX_RESPONSE_SIZE, "USER %s\r\n", username);
-    if(send_ftp_command(socket_fd, command) < 0){
+    if(send_ftp_command(socket_fd, command)){
         free_resources(response, command, NULL);
         return -1;
     }
     
-    if(read_ftp_response(socket_fd, response, &response_code) < 0){
+    if(read_ftp_response(socket_fd, response, &response_code)){
         free_resources(response, command, NULL);
         return -1;
     } 
@@ -197,12 +197,12 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
 
     // Send PASS command
     snprintf(command, MAX_RESPONSE_SIZE, "PASS %s\r\n", password);
-    if(send_ftp_command(socket_fd, command) < 0){
+    if(send_ftp_command(socket_fd, command)){
         free_resources(response, command, NULL);
         return -1;
     }
 
-    if(read_ftp_response(socket_fd, response, &response_code) < 0){
+    if(read_ftp_response(socket_fd, response, &response_code)){
         free_resources(response, command, NULL);
         return -1;
     }
@@ -216,7 +216,7 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
     free_resources(response, command, NULL);
 
     // printf("[INFO] FTP login successful\n");
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
@@ -226,12 +226,12 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
     char *response = malloc(MAX_RESPONSE_SIZE);
     int response_code = 0;
 
-    if(send_ftp_command(socket_fd, pasv_command) < 0) {
+    if(send_ftp_command(socket_fd, pasv_command)) {
         free(response);
         return -1;
     }
 
-    if(read_ftp_response(socket_fd, response, &response_code) < 0){
+    if(read_ftp_response(socket_fd, response, &response_code)){
         free(response);
         return -1;
     } 
@@ -256,7 +256,7 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
 
     *data_port = (port1 << 8) + port2;  // port1 * 256 + port2
     free(response);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path){
@@ -327,15 +327,40 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     }
 
     free_resources(buf, response, command);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
-int clouse_connection(const int socket_fd){
-    if (close(socket_fd)<0) {
+int clouse_connection(const int socket_fd_A, const int socket_fd_B){
+
+    char *pasv_command = "quit\r\n";
+    char *response = malloc(MAX_RESPONSE_SIZE);
+    int response_code = 0;
+
+    if(send_ftp_command(socket_fd_A, pasv_command)) {
+        free(response);
+        return -1;
+    }
+
+    if(read_ftp_response(socket_fd_A, response, &response_code)){
+        free(response);
+        return -1;
+    } 
+
+    if(response_code != CODE_221){
+        printf("[ERROR] failed quit command\n");
+        free(response);
+        return -1;
+    }
+
+    if (close(socket_fd_A)<0) {
         perror("close()");
         return -1;
     }
-    return 0;
+    if (socket_fd_B != NOT_CONNECTED && close(socket_fd_B)) {
+        perror("close()");
+        return -1;
+    }
+    return EXIT_SUCCESS;
 }
 
 void free_resources(char* buf1, char* buf2, char* buf3){
