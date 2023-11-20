@@ -164,7 +164,7 @@ int read_ftp_response(const int socket_fd, char* response_buffer, int* response_
 int send_ftp_command(const int socket_fd, const char* command){
     size_t bytes = write(socket_fd, command, strlen(command));
     if(bytes < 0){
-        perror("[ERROR] filed sending command to FTP server");
+        perror("[ERROR] filed sending command to FTP server\n");
         return -1;
     }
     return EXIT_SUCCESS;
@@ -190,7 +190,7 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
     } 
     
     if(response_code != CODE_331){
-        printf("[ERROR] login failed with user: %s", username);
+        printf("[ERROR] login failed with user: %s\n", username);
         free_resources(response, command, NULL);
         return -1;
     }
@@ -208,7 +208,7 @@ int login_ftp(const int socket_fd, const char* username, const char* password){
     }
 
     if(response_code != CODE_230){
-        printf("[ERROR] login failed with password: %s", password);
+        printf("[ERROR] login failed with password: %s\n", password);
         free_resources(response, command, NULL);
         return -1;
     }
@@ -278,7 +278,7 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     } 
     
     if(response_code != CODE_150){
-        printf("[ERROR] retr command with URL path: %s", url_path);
+        printf("[ERROR] retr command with URL path: %s\n", url_path);
         free_resources(response, command, NULL);
         return -1;
     }
