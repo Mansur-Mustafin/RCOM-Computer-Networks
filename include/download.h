@@ -16,6 +16,7 @@
 #define MAX_RESPONSE_SIZE 1024
 
 #define SERVER_PORT 21 // TPF tranfer
+#define NOT_CONNECTED -1 // while socket not connected
 
 #define h_addr h_addr_list[0]	// The first address in h_addr_list.
 
@@ -25,6 +26,7 @@
 #define CODE_227 227
 #define CODE_150 150
 #define CODE_226 226
+#define CODE_221 221
 
 struct Settings {
     char user[MAX_SIZE];
@@ -69,7 +71,7 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port);
 int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path);
 
 // 
-int clouse_connection(const int socket_fd);
+int clouse_connection(const int socket_fd_A, const int socket_fd_B);
 
 // Funca auxiliar que faz free()
 void free_resources(char* buf1, char* buf2, char* buf3);
