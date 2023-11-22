@@ -16,23 +16,24 @@
 #define MAX_RESPONSE_SIZE 1024
 
 #define SERVER_PORT 21 // TPF tranfer
-#define NOT_CONNECTED -1 // while socket not connected
+#define NOT_CONNECTED -1 // while socket are not connected
 
 #define h_addr h_addr_list[0]	// The first address in h_addr_list.
 
-#define CODE_220 220
-#define CODE_331 331
-#define CODE_230 230
-#define CODE_227 227
-#define CODE_150 150
-#define CODE_226 226
-#define CODE_221 221
+// TODO: should we rename this codes?
+#define CODE_220 220 // Response code for "Service ready for new user."
+#define CODE_331 331 // Response code for "User name okay, need password."
+#define CODE_230 230 // Response code for "User logged in, proceed."
+#define CODE_227 227 // Response code for "Entering Passive Mode (h1,h2,h3,h4,p1,p2)."
+#define CODE_150 150 // Response code for "File status okay; about to open data connection."
+#define CODE_226 226 // Response code for "Closing data connection."
+#define CODE_221 221 // Response code for "Service closing control connection."
 
 struct Settings {
     char user[MAX_SIZE];
     char password[MAX_SIZE];
     char host[MAX_SIZE];
-    char host_name[MAX_SIZE]; // of. host name.
+    char host_name[MAX_SIZE];   // oficial host name.
     char url_path[MAX_SIZE];  
     char ip[MAX_SIZE];
 };
