@@ -20,7 +20,6 @@
 
 #define h_addr h_addr_list[0]	// The first address in h_addr_list.
 
-// TODO: should we rename this codes?
 #define CODE_220 220 // Response code for "Service ready for new user."
 #define CODE_331 331 // Response code for "User name okay, need password."
 #define CODE_230 230 // Response code for "User logged in, proceed."
