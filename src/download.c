@@ -6,17 +6,23 @@ int parse_ftp_url(const char *text, struct Settings *settings){
     const char *at_sign = strchr(text, '@');
     int result;
     if(at_sign){
-        // URL contains user and password
-        result = sscanf(text, "ftp://%255[^:]:%255[^@]@%255[^/]/%255[^\n]",
-                                settings->user,
-                                settings->password,
-                                settings->host,
-                                settings->url_path);
-        
-        if (result != 4) return -1;
-        // if (result < 3) return -1;
-        // if (result == 3) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
-        
+        // URL contains user and possibly a password
+        char user_pass[512];
+        result = sscanf(text, "ftp://%511[^@]@%255[^/]/%255[^\n]", 
+                               user_pass,
+                               settings->host, 
+                               settings->url_path);
+
+        if (result != 3) return -1;
+
+        char *colon = strchr(user_pass, ':');
+        if (colon) {
+            *colon = '\0';
+            strncpy(settings->user, user_pass, MAX_SIZE - 1);
+            strncpy(settings->password, colon + 1, MAX_SIZE - 1);
+        } else {
+            return -1;
+        }
     } else {
         // URL does not contain user and password, parse accordingly
         result = sscanf(text, "ftp://%255[^/]/%255[^\n]", 
@@ -24,8 +30,6 @@ int parse_ftp_url(const char *text, struct Settings *settings){
                                 settings->url_path);
         
         if (result != 2) return -1;
-        // if (result < 1) return -1;
-        // if (result == 1) strncpy(settings->url_path, "/", MAX_SIZE - 1); // Se nao tiver o URL-path
         
         strncpy(settings->user, "anonymous", MAX_SIZE - 1);
         strncpy(settings->password, "anonymous", MAX_SIZE - 1);
@@ -41,9 +45,6 @@ int parse_ftp_url(const char *text, struct Settings *settings){
     /*save the ip*/
     strncpy(settings->ip, inet_ntoa(*((struct in_addr *) h->h_addr)), MAX_SIZE - 1);
     strncpy(settings->host_name, h->h_name, MAX_SIZE - 1);
-
-    /*save the filename*/
-    // TODO: take the filename.
 
     return EXIT_SUCCESS;
 }

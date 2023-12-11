@@ -9,7 +9,7 @@ SRC = src/
 INCLUDE = include/
 BIN = bin/
 
-URL = ftp://ftp.up.pt/pub/kodi/timestamp.txt  # We can change this URL.
+URL = ftp://anonymous:@netlab1.fe.up.pt/pub.txt # We can change this URL.
 
 # ftp://netlab1.fe.up.pt/pub.txt
 # ftp://rcom:rcom@netlab1.fe.up.pt/pipe.txt
