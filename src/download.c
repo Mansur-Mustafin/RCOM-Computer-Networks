@@ -278,7 +278,13 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
         return -1;
     } 
     
-    if(response_code != CODE_150){
+    /*if(response_code != CODE_150 && response_code != CODE_125){
+        printf("[ERROR] retr command with URL path: %s\n", url_path);
+        free_resources(response, command, NULL);
+        return -1;
+    }*/
+    
+    if(response_code / 100 != 1){
         printf("[ERROR] retr command with URL path: %s\n", url_path);
         free_resources(response, command, NULL);
         return -1;
@@ -316,16 +322,22 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
 
     // Check if its was finished.
 
-    if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
-        free_resources(buf, response, command);
-        return -1;
-    } 
+    do
+        {
+            if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
+            free_resources(buf, response, command);
+            return -1;
+        } 
 
-    if(response_code != CODE_226){
-        printf("[ERROR] transfer was not complete\n");
-        free_resources(buf, response, command);
-        return -1;
-    }
+        if(response_code != CODE_226){
+            printf("[ERROR] transfer was not complete\n");
+            free_resources(buf, response, command);
+            return -1;
+        }
+    } while (response_code / 100 < 2);
+
+
+    
 
     free_resources(buf, response, command);
     return EXIT_SUCCESS;

@@ -25,6 +25,7 @@
 #define CODE_230 230 // Response code for "User logged in, proceed."
 #define CODE_227 227 // Response code for "Entering Passive Mode (h1,h2,h3,h4,p1,p2)."
 #define CODE_150 150 // Response code for "File status okay; about to open data connection."
+#define CODE_125 125 // Response code for "Data connection already open." TODO: check this.
 #define CODE_226 226 // Response code for "Closing data connection."
 #define CODE_221 221 // Response code for "Service closing control connection."
 

@@ -17,7 +17,7 @@ URL = ftp://anonymous:@netlab1.fe.up.pt/pub.txt # We can change this URL.
 # ftp://rcom:rcom@netlab1.fe.up.pt/files/pic2.png
 # ftp://rcom:rcom@netlab1.fe.up.pt/files/crab.mp4
 # ftp://ftp.up.pt/pub/kodi/timestamp.txt
-
+# ftp://demo:password@test.rebex.net/readme.txt
 
 # Targets
 .PHONY: all
