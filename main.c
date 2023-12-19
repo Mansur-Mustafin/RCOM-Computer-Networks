@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 
     if(gettimeofday(&start, NULL)) {
         perror("gettimeofday");
+        if(clouse_connection(socket_A, socket_B)) exit(-1);
         exit(-1);
     }
 
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
 
     if(gettimeofday(&end, NULL)) {
         perror("gettimeofday");
+        if(clouse_connection(socket_A, socket_B)) exit(-1);
         exit(-1);
     }
 
