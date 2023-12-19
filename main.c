@@ -1,4 +1,6 @@
 #include "download.h"
+#include <sys/time.h>
+#include <time.h>
 
 int main(int argc, char *argv[]) {
 
@@ -9,6 +11,8 @@ int main(int argc, char *argv[]) {
 
     struct Settings settings;
     memset(&settings, 0, sizeof(settings));
+    struct timeval start, end;
+    double time_used;
 
     if(parse_ftp_url(argv[1], &settings)){
         printf("Usage: %s ftp://[<user>:<password>@]<host>/<url-path>\n", argv[0]);
@@ -57,13 +61,25 @@ int main(int argc, char *argv[]) {
     
     // TODO: temos que ler algo depois de conectar o socket? (Eu verifiquei tem nada la).
 
-    if(download_file(socket_A, socket_B, settings.url_path)){
+    if(gettimeofday(&start, NULL)) {
+        perror("gettimeofday");
+        exit(-1);
+    }
+
+    if(download_file(socket_A, socket_B, settings.url_path, settings.filename)){
         if(clouse_connection(socket_A, socket_B)) exit(-1);
         exit(-1);
     }
 
-    // TODO: so isso?
+    if(gettimeofday(&end, NULL)) {
+        perror("gettimeofday");
+        exit(-1);
+    }
+
     if(clouse_connection(socket_A, socket_B)) exit(-1);
+
+    time_used = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    printf("Download %s completed in %.2f seconds\n", settings.filename, time_used);
 
     return 0;
 }

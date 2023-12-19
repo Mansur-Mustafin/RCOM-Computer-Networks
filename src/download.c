@@ -46,6 +46,15 @@ int parse_ftp_url(const char *text, struct Settings *settings){
     strncpy(settings->ip, inet_ntoa(*((struct in_addr *) h->h_addr)), MAX_SIZE - 1);
     strncpy(settings->host_name, h->h_name, MAX_SIZE - 1);
 
+    /*save the filename*/
+    const char *last_slash = strrchr(settings->url_path, '/');
+    if (last_slash != NULL) {
+        strncpy(settings->filename, last_slash + 1, MAX_SIZE - 1);
+    } else {
+        strncpy(settings->filename, settings->url_path, MAX_SIZE - 1);
+    }
+    settings->filename[MAX_SIZE - 1] = '\0';
+
     return EXIT_SUCCESS;
 }
 
@@ -260,7 +269,7 @@ int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port){
     return EXIT_SUCCESS;
 }
 
-int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path){
+int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path, const char* filename){
 
     char *command = malloc(MAX_RESPONSE_SIZE);
     char *response = malloc(MAX_RESPONSE_SIZE);
@@ -291,17 +300,6 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
     }
 
     // Download file.
-
-    char filename[MAX_SIZE];
-    const char *last_slash = strrchr(url_path, '/');
-    if (last_slash != NULL) {
-        strncpy(filename, last_slash + 1, MAX_SIZE - 1);
-    } else {
-        strncpy(filename, url_path, MAX_SIZE - 1);
-    }
-    filename[MAX_SIZE - 1] = '\0';
-
-
     FILE *file = fopen(filename, "wb");
 
     if(file == NULL){
@@ -322,9 +320,8 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
 
     // Check if its was finished.
 
-    do
-        {
-            if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
+    do{
+        if(read_ftp_response(socket_fd_A, response, &response_code) < 0){
             free_resources(buf, response, command);
             return -1;
         } 
@@ -335,9 +332,6 @@ int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_
             return -1;
         }
     } while (response_code / 100 < 2);
-
-
-    
 
     free_resources(buf, response, command);
     return EXIT_SUCCESS;
