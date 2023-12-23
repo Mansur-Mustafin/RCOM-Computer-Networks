@@ -25,7 +25,7 @@
 #define CODE_230 230 // Response code for "User logged in, proceed."
 #define CODE_227 227 // Response code for "Entering Passive Mode (h1,h2,h3,h4,p1,p2)."
 #define CODE_150 150 // Response code for "File status okay; about to open data connection."
-#define CODE_125 125 // Response code for "Data connection already open." TODO: check this.
+#define CODE_125 125 // Response code for "Data connection already open." 
 #define CODE_226 226 // Response code for "Closing data connection."
 #define CODE_221 221 // Response code for "Service closing control connection."
 
@@ -65,15 +65,14 @@ int send_ftp_command(const int socket_fd, const char* command);
 // Faz Login ao servidor (USER anonymous; PASS anonymous) 
 int login_ftp(const int socket_fd, const char* username, const char* password);
 
-// TODO: perguntar ao professor se e nessario pegar o data_ip? Ele nao vai ser igual ao IP do socket_A?
 // send command pasv and cacl the data_port
 int enter_ftp_passive_mode(const int socket_fd, char* data_ip, int* data_port);
 
 // Baixa o arquivo.
 int download_file(const int socket_fd_A, const int socket_fd_B, const char* url_path, const char* filename);
 
-// 
+// Fecha a conexao do A, e B se foram abertas
 int clouse_connection(const int socket_fd_A, const int socket_fd_B);
 
-// Funca auxiliar que faz free()
+// Funcao auxiliar que faz free()
 void free_resources(char* buf1, char* buf2, char* buf3);

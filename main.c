@@ -59,8 +59,6 @@ int main(int argc, char *argv[]) {
     }
     printf("[INFO] socket_B: %d\n", socket_B);
     
-    // TODO: temos que ler algo depois de conectar o socket? (Eu verifiquei tem nada la).
-
     if(gettimeofday(&start, NULL)) {
         perror("gettimeofday");
         if(clouse_connection(socket_A, socket_B)) exit(-1);
