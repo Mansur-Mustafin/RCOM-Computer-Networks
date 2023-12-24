@@ -29,3 +29,9 @@ To run the programm:
 To clean:
 `make clean`
 
+## Contributors and Grade
+
+* [Daniel Ferreira](https://github.com/dsantosferreira)
+* [Mansur Mustafin](https://github.com/Mansur-Mustafin) 
+
+Grade: x/20
