@@ -1,4 +1,11 @@
-# RCOM-TP2
+# RCOM-Computer-Networks
+
+## Contributors and Grade
+
+* [Daniel Ferreira](https://github.com/dsantosferreira)
+* [Mansur Mustafin](https://github.com/Mansur-Mustafin) 
+
+Grade: 19.5/20
 
 ## Setup
 
@@ -29,9 +36,4 @@ To run the programm:
 To clean:
 `make clean`
 
-## Contributors and Grade
 
-* [Daniel Ferreira](https://github.com/dsantosferreira)
-* [Mansur Mustafin](https://github.com/Mansur-Mustafin) 
-
-Grade: 19.5/20
