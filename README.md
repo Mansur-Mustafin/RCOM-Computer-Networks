@@ -34,4 +34,4 @@ To clean:
 * [Daniel Ferreira](https://github.com/dsantosferreira)
 * [Mansur Mustafin](https://github.com/Mansur-Mustafin) 
 
-Grade: x/20
+Grade: 19.5/20
